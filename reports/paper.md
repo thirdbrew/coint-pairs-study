@@ -340,7 +340,88 @@ concatenated. Filtered states were causal *given* those parameters; the paramete
 not. Caught by the estimator-level probe: perturbing the last trading day moved β on
 earlier days by 3.8e-02.
 
-## 7. Limitations
+## 7. What this study could, and could not, have seen
+
+"No edge found" is worth nothing on its own: a test with no power finds nothing by
+construction. Three quantities answer the question properly, and they are routinely
+confused with one another.
+
+| | value |
+|---|---|
+| Sample | 3,642 trading days (14.5 years) |
+| Observed annualised Sharpe | **−0.2496** |
+| Standard error of an annualised Sharpe at this T | 0.2630 |
+| **Minimum detectable Sharpe** (α=0.05, power=80%) | **+0.6541** |
+| **Upper 95% confidence bound** | **+0.2958** |
+
+**The sample was underpowered for its own registered bar.** The minimum detectable
+Sharpe is +0.654, above the 0.50 the study registered. This test could not reliably
+have distinguished a true Sharpe of exactly 0.50 from zero. That is stated here rather
+than buried, because it is the first thing a careful reader should ask.
+
+**And the null is informative anyway.** The upper 95% bound is +0.296, which *excludes*
+0.50. Both statements are true at once: the study could not reliably detect an edge at
+its bar, and the value it observed still landed far enough below that the bar is ruled
+out. Reporting only one of these would be motivated selection.
+
+### 7.1 The binding constraint is the search, not the sample
+
+Bailey & López de Prado's minimum backtest length asks how much data a search of a
+given size needs before its winner means anything: MinBTL ≈ 2·ln(N)/SR².
+
+| | years |
+|---|---|
+| Needed to validate a Sharpe of 1.00 at N=2,465,737 | **29.4** |
+| Needed to validate a Sharpe of 0.50 at N=2,465,737 | **117.7** |
+| **Available** | **14.5** |
+
+**After searching 2.46 million pairs, validating a Sharpe of 0.50 would take 118 years
+of data.** Not 118 years of this strategy — 118 years to distinguish it from the best
+of 2.46 million coin flips.
+
+That is a property of the search, not of the sample, and it has a consequence worth
+stating plainly: **testing fewer pairs would not improve the strategy. It would lower
+the bar the strategy has to clear.** The multiple-testing correction is not a hurdle
+imposed on the result; it is the price of having looked.
+
+### 7.2 Sensitivity to the one rule that cannot be made causal
+
+§6.3 describes three data-quality checks. Two read only information available at the
+time; one does not:
+
+| rule | reads | causal? | removes |
+|---|---|---|---|
+| membership overlap | the point-in-time membership file | yes | 23 tickers |
+| formation median > $10,000 | the formation window only | yes | PARA |
+| **terminal price < $1** | **the last price in the whole panel** | **no** | COL, CPWR |
+
+The terminal-price rule cannot be repaired. `auto_adjust` back-adjusts the entire
+series for every future split, so NVDA's 2012 close in this panel already encodes its
+2024 split ($0.36), and no price-level test on a back-adjusted panel separates a real
+company from a corrupted stub without future information. That is a property of the
+data source, not of the code.
+
+So the study was run both ways.
+
+| setting | Sharpe | total |
+|---|---|---|
+| As published, all rules on | **−0.2496** | −26.6% |
+| **Non-causal rule off only** | **−0.2496** | −26.6% |
+| All price rules off (also un-removes PARA) | +0.2785 | +46.1% |
+
+**The non-causal rule's isolated effect is exactly 0.0000**, and the mechanism is
+precise rather than approximate. It touches a single window, W05, where it removes two
+`COL` pairs. Those pairs are tradable — 128 days each — but their z-score never crosses
+the entry threshold, so no position is ever opened, and W05 returned exactly 0.0000 with
+or without them. Halving zero is still zero.
+
+**The entire +0.5281 swing in the third row belongs to the *causal* rule**, which
+removes the contaminated `LW/PARA` pair in W23. That is the same mis-resolved ticker
+from §6.3, and this quantifies what it was worth: **a single bad data point moved the
+headline Sharpe by 0.53, from −0.25 to +0.28.** It moved it in the flattering direction,
+which is exactly why the filter is not optional.
+
+## 8. Limitations
 
 **Point-in-time membership fixes selection, not prices.** 190 of 829 union members
 (22.9%) cannot be priced; coverage is **77.1%**. The residual bias is strictly smaller
@@ -349,11 +430,9 @@ than survivorship bias but not zero. A clean fix needs CRSP or Norgate.
 The loss is **time-varying**: early windows lose proportionally more names (W00 has 332
 eligible names against W28's 487), so the study is better-powered after ~2018.
 
-- **The ticker-reuse filter is a full-sample rule applied to 2012 windows.** A name is
-  barred everywhere based on its 2026 terminal price. 16 (ticker, window) slots are
-  affected and CPWR would have been caught by the per-window check anyway, but this is
-  outcome-dependent information entering universe construction, and it is disclosed
-  rather than defended.
+- **One data-quality rule uses full-sample information** (§7.2). It cannot be made
+  causal on a back-adjusted panel, so its effect was measured instead: **exactly zero**.
+  Disclosed and quantified rather than defended.
 - **`n_trials` describes a slightly different universe than the graded run.** The bar was
   registered on the pre-data-fix panel (2,465,737) and the run enumerated 2,458,394. The
   larger figure is retained; the direction is conservative.
@@ -362,7 +441,7 @@ eligible names against W28's 487), so the study is better-powered after ~2018.
 - **A non-detection, not a disproof.** The CI contains zero.
 - **Long/short, therefore untradable in a cash account.** No position was ever taken.
 
-## 8. Reproducing
+## 9. Reproducing
 
 ```bash
 python formation.py       # panel, coverage, data-quality audit
@@ -370,6 +449,8 @@ python selection.py       # stage A: 2.46M Engle-Granger tests, ~40 min on 16 co
 python grade_A.py         # registered metrics + cost curve
 python grade_C.py         # three estimators, Model Confidence Set
 python mechanism_C.py     # the absorption table
+python power_analysis.py  # detectable effect, upper bound, MinBTL
+python sensitivity_filter.py  # dependence on the non-causal rule
 python allocate.py        # convex allocation vs equal weight
 python test_lookahead.py ; python test_data_quality.py
 ```

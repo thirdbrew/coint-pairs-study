@@ -1,0 +1,17 @@
+{
+  "sharpe_filter_on": -0.24958855341903374,
+  "sharpe_filter_off": 0.2784827282461719,
+  "sharpe_difference": 0.5280712816652056,
+  "windows_with_changed_book": [
+    5,
+    23
+  ],
+  "n_windows_changed": 2,
+  "extra_names": 19,
+  "extra_tests": 7341,
+  "fdr_on": 1446,
+  "fdr_off": 1458,
+  "empty_books_on": 9,
+  "empty_books_off": 7,
+  "both_fail_registered_bar": true
+}

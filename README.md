@@ -24,6 +24,27 @@ ratio the surviving book returns Sharpe **−0.25**, against a pre-registered ba
 **At zero cost — free trading — the Sharpe is still −0.19.** The cost curve never crosses
 zero. This edge is not destroyed by transaction costs; it is not there gross.
 
+## The number that frames the whole thing
+
+After searching 2.46 million pairs, **validating a Sharpe of 0.50 would take 118 years of
+data.** Not 118 years of this strategy — 118 years to distinguish it from the best of 2.46
+million coin flips. The sample is 14.5.
+
+| Bailey–López de Prado minimum backtest length, N=2,465,737 | years |
+|---|---|
+| to validate a Sharpe of 1.00 | 29.4 |
+| to validate a Sharpe of 0.50 | 117.7 |
+| **available** | **14.5** |
+
+That is a property of the *search*, not of the sample — with a consequence worth stating
+plainly: **testing fewer pairs would not improve the strategy. It would lower the bar the
+strategy has to clear.**
+
+And the null is characterised in both directions, because reporting one would be motivated
+selection: the minimum detectable Sharpe here is **+0.654**, *above* the registered bar of
+0.50 — so the sample was underpowered for its own bar. The upper 95% bound is **+0.296**,
+which *excludes* 0.50 — so the null is informative anyway.
+
 ## Pre-registration
 
 Three hypotheses were registered, frozen and **pushed to a remote before any code ran**.

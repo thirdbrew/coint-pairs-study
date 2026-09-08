@@ -1,0 +1,19 @@
+{
+  "days": 3642,
+  "years": 14.452380952380953,
+  "observed_sharpe": -0.24958855341903186,
+  "ci_lo": -0.7228547118276181,
+  "ci_hi": 0.2957900144926531,
+  "sharpe_se": 0.2630451505646604,
+  "min_detectable_sharpe": 0.6540551540618801,
+  "alpha": 0.05,
+  "power": 0.8,
+  "registered_bar": 0.5,
+  "underpowered_for_own_bar": true,
+  "upper_bound_excludes_bar": true,
+  "n_trials": 2465737,
+  "minbtl_years_sr1": 29.436002613145593,
+  "minbtl_years_at_bar": 117.74401045258237,
+  "minbtl_years_at_sr_star": 16.725367879304926,
+  "sr_star": 1.326635384922816
+}

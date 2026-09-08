@@ -1,0 +1,18 @@
+{
+  "sharpe_all_rules_on": -0.24958855341903374,
+  "sharpe_noncausal_off": -0.24958855341903374,
+  "sharpe_all_price_rules_off": 0.2784827282461719,
+  "isolated_noncausal_effect": 0.0,
+  "causal_para_effect": 0.5280712816652056,
+  "noncausal_off_ci": [
+    -0.7228547118276212,
+    0.2957900144926514
+  ],
+  "windows_touched_by_noncausal_rule": [
+    5
+  ],
+  "noncausal_rule_removes": [
+    "COL",
+    "CPWR"
+  ]
+}
