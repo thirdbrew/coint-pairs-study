@@ -26,9 +26,11 @@ universe.py was written to kill.
 """
 
 import argparse
+import functools
 import os
 import time
 
+import numpy as np
 import pandas as pd
 import yfinance as yf
 
@@ -141,19 +143,137 @@ def coverage(panel):
                              label=f"{START}..{END}", union=union)
 
 
-def members(window, panel, min_obs=200):
-    """Tickers eligible for `window`: index members at formation start, priced.
+# MAX_PX is 10,000 because NVR genuinely trades near $7,000 -- a ceiling has to
+# sit above the real outlier or it deletes a real company to catch a fake one.
+MAX_PX = 10_000.0
+MIN_LAST_PX = 1.0         # on the TERMINAL price only -- see below
+MAX_DAY_MOVE = 1.0        # |log return| on any single day (~2.7x)
+
+
+def _last_px(series):
+    s = series.dropna()
+    return float(s.iloc[-1]) if len(s) else float("nan")
+
+
+def panel_rejects(panel):
+    """Tickers whose series cannot be the company the symbol claims. {ticker: reason}.
+
+    WHY THIS EXISTS. The 190 unpriceable names are the VISIBLE half of the
+    delisting problem. The invisible half is worse: a retired symbol that was
+    reused, or that resolves to a foreign listing, returns the WRONG COMPANY'S
+    PRICES at plausible-looking magnitudes, and nothing in the pipeline objects.
+    Missing data announces itself; wrong data does not. Measured here: PARA
+    splices a ~101,500 foreign listing onto Paramount's $3; MHS prices from 2020
+    for a company acquired in 2012; SBNY prices from 2024 for a bank that failed
+    in 2023.
+
+    Not benign noise. In W23 the mis-resolved PARA produced one pair returning
+    +149% and carried the whole window to +72.7%.
+
+    TWO TESTS, AND NEITHER IS AN ARBITRARY PRICE FLOOR -- which matters, because
+    the first version of this filter used one and deleted NVIDIA. auto_adjust
+    back-adjusts for splits, so a stock with large splits has an arbitrarily
+    small price EARLY: NVDA's legitimate 2011 close here is $0.36. An absolute
+    floor on the median cannot tell that from a corrupted stub.
+
+      1. MEMBERSHIP OVERLAP. The series must carry prices during a spell when
+         the ticker was actually in the index. Zero overlap means the symbol was
+         reused by something else. Uses the same PIT file as selection, so it
+         costs no new data.
+      2. TERMINAL PRICE. Back-adjustment scales history DOWN and leaves the last
+         price untouched, so the endpoint is the honest one. NVDA ends at 194.97
+         and passes; COL ends at 0.05 and CPWR at 0.01, and they do not.
+
+    NOTE THE DIRECTION, because it is what makes this a data fix rather than a
+    result fix: the contaminated pair MADE money. Removing it makes this study's
+    numbers WORSE. Specified on data provenance alone, and written before any
+    graded metric was read.
+    """
+    out = {}
+    for t in panel.columns:
+        s = panel[t].dropna()
+        if len(s) == 0:
+            continue
+
+        spells = _membership_spells(t)
+        if spells and not any(not (s.index[-1] < a or s.index[0] > b)
+                              for a, b in spells):
+            span = f"{s.index[0]:%Y-%m}..{s.index[-1]:%Y-%m}"
+            mem = ", ".join(f"{a:%Y-%m}..{b:%Y-%m}" for a, b in spells)
+            out[t] = f"prices {span} never overlap membership {mem}"
+            continue
+
+        last = _last_px(s)
+        if not np.isfinite(last) or last < MIN_LAST_PX:
+            out[t] = f"terminal price {last:,.2f} below {MIN_LAST_PX:,.2f}"
+    return out
+
+
+@functools.lru_cache(maxsize=None)
+def _membership_spells(ticker):
+    """(start, end) Timestamps this ticker was an index member. Open spells end today."""
+    df = pd.read_csv(u.PIT_CSV)
+    rows = df[df["ticker"] == ticker]
+    spells = []
+    for _, r in rows.iterrows():
+        a = pd.Timestamp(r["start_date"])
+        b = (pd.Timestamp(r["end_date"]) if isinstance(r["end_date"], str)
+             and r["end_date"].strip() else pd.Timestamp(END))
+        spells.append((a, b))
+    return tuple(spells)
+
+
+def implausible(prices):
+    """Formation-window checks: price level and single-day discontinuity."""
+    s = prices.dropna()
+    if len(s) == 0:
+        return "no data"
+    med = float(s.median())
+    if med > MAX_PX:
+        return f"median {med:,.2f} above {MAX_PX:,.0f} (foreign listing / wrong currency)"
+    if float(s.min()) <= 0:
+        return "non-positive price"
+    step = np.abs(np.diff(np.log(s.to_numpy(dtype=float))))
+    if len(step) and np.nanmax(step) > MAX_DAY_MOVE:
+        return f"single-day log move {np.nanmax(step):.2f} exceeds {MAX_DAY_MOVE:.2f}"
+    return None
+
+
+_PANEL_BAD = {}
+
+
+def panel_bad(panel):
+    """Cached panel-level rejections. Computed once, used by every window."""
+    key = (id(panel), panel.shape)
+    if key not in _PANEL_BAD:
+        _PANEL_BAD[key] = panel_rejects(panel)
+    return _PANEL_BAD[key]
+
+
+def members(window, panel, min_obs=200, rejects=None):
+    """Tickers eligible for `window`: index members at formation start, priced,
+    and carrying a price series that is plausible for a US listing.
 
     min_obs is against the formation window, not the whole sample. A name that
     joined the index mid-formation has a short history here and a hedge ratio
     fit on 40 observations is noise -- 200 of ~252 trading days is the floor.
+
+    Pass a dict as `rejects` to collect {ticker: reason} for the audit trail.
+    A filter that drops names silently is a second invisible bias.
     """
     asof = u.sp500_asof(window.formation_start.strftime("%Y-%m-%d"))
     form = window.formation(panel)
+    bad = panel_bad(panel)
     ok = []
     for t in asof:
-        if t in form.columns and form[t].notna().sum() >= min_obs:
-            ok.append(t)
+        if t not in form.columns or form[t].notna().sum() < min_obs:
+            continue
+        why = bad.get(t) or implausible(form[t])
+        if why is not None:
+            if rejects is not None:
+                rejects[t] = why
+            continue
+        ok.append(t)
     return sorted(ok)
 
 
@@ -174,16 +294,24 @@ def main():
     print(f"  last  {ws[-1]}")
 
     print("\nper-window eligible names and pair counts:")
-    total = 0
-    for w in (ws[0], ws[len(ws) // 2], ws[-1]):
-        m = members(w, panel)
-        n = len(m)
-        print(f"  W{w.index:02d} form {w.formation_start:%Y-%m-%d}: "
-              f"{n} names, {n * (n - 1) // 2:,} pairs")
+    rejects, total = {}, 0
+    counts = {}
     for w in ws:
-        n = len(members(w, panel))
+        n = len(members(w, panel, rejects=rejects))
+        counts[w.index] = n
         total += n * (n - 1) // 2
+    for i in (0, len(ws) // 2, len(ws) - 1):
+        n = counts[i]
+        print(f"  W{i:02d} form {ws[i].formation_start:%Y-%m-%d}: "
+              f"{n} names, {n * (n - 1) // 2:,} pairs")
     print(f"\ntotal Engle-Granger tests across all {len(ws)} windows: {total:,}")
+
+    print(f"\nprice-plausibility rejections: {len(rejects)} distinct tickers")
+    for t, why in sorted(rejects.items()):
+        print(f"  {t:<8} {why}")
+    if rejects:
+        print("\n  These are not missing data -- they PRICED, with the wrong company's")
+        print("  numbers. Missing data announces itself; wrong data does not.")
 
 
 if __name__ == "__main__":

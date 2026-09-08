@@ -1,0 +1,24 @@
+{
+  "window": 15,
+  "formation_start": "2018-07-01",
+  "formation_end": "2019-07-01",
+  "trading_end": "2020-01-01",
+  "names": 412,
+  "pairs_enumerated": 84666,
+  "tested": 84666,
+  "alpha": 0.05,
+  "sig_raw": 3899,
+  "expected_fp": 4233.3,
+  "excess_over_noise": -334.3000000000002,
+  "q_fdr": 0.1,
+  "sig_fdr": 1,
+  "book_size": 1,
+  "book": [
+    {
+      "a": "KDP",
+      "b": "PG",
+      "tstat": -6.092747627500857,
+      "pvalue": 1.0214043684346105e-06
+    }
+  ]
+}

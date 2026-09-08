@@ -1,0 +1,30 @@
+{
+  "window": 26,
+  "formation_start": "2024-01-01",
+  "formation_end": "2025-01-01",
+  "trading_end": "2025-07-01",
+  "names": 480,
+  "pairs_enumerated": 114960,
+  "tested": 114960,
+  "alpha": 0.05,
+  "sig_raw": 7354,
+  "expected_fp": 5748.0,
+  "excess_over_noise": 1606.0,
+  "q_fdr": 0.1,
+  "sig_fdr": 2,
+  "book_size": 2,
+  "book": [
+    {
+      "a": "CINF",
+      "b": "NDAQ",
+      "tstat": -6.691906361485778,
+      "pvalue": 4.5518831576111234e-08
+    },
+    {
+      "a": "ADM",
+      "b": "BG",
+      "tstat": -6.438980368086847,
+      "pvalue": 1.7323608989193494e-07
+    }
+  ]
+}

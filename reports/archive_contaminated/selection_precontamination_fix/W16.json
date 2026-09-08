@@ -1,0 +1,30 @@
+{
+  "window": 16,
+  "formation_start": "2019-01-01",
+  "formation_end": "2020-01-01",
+  "trading_end": "2020-07-01",
+  "names": 421,
+  "pairs_enumerated": 88410,
+  "tested": 88410,
+  "alpha": 0.05,
+  "sig_raw": 8930,
+  "expected_fp": 4420.5,
+  "excess_over_noise": 4509.5,
+  "q_fdr": 0.1,
+  "sig_fdr": 2,
+  "book_size": 2,
+  "book": [
+    {
+      "a": "CBOE",
+      "b": "FIS",
+      "tstat": -6.378223175247401,
+      "pvalue": 2.376573597428523e-07
+    },
+    {
+      "a": "PPG",
+      "b": "SWK",
+      "tstat": -5.986220580025222,
+      "pvalue": 1.738414866355026e-06
+    }
+  ]
+}

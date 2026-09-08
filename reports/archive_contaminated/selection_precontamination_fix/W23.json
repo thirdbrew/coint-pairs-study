@@ -1,0 +1,30 @@
+{
+  "window": 23,
+  "formation_start": "2022-07-01",
+  "formation_end": "2023-07-01",
+  "trading_end": "2024-01-01",
+  "names": 465,
+  "pairs_enumerated": 107880,
+  "tested": 107880,
+  "alpha": 0.05,
+  "sig_raw": 4274,
+  "expected_fp": 5394.0,
+  "excess_over_noise": -1120.0,
+  "q_fdr": 0.1,
+  "sig_fdr": 2,
+  "book_size": 2,
+  "book": [
+    {
+      "a": "LW",
+      "b": "PARA",
+      "tstat": -6.252301626094945,
+      "pvalue": 4.5473498229396884e-07
+    },
+    {
+      "a": "FTV",
+      "b": "UAL",
+      "tstat": -5.990593639981303,
+      "pvalue": 1.7011098827023394e-06
+    }
+  ]
+}

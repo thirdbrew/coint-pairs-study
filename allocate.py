@@ -165,10 +165,10 @@ def main():
     print(f"\nequal weight Sharpe {s_eq:.3f} | optimised Sharpe {s_opt:.3f} "
           f"| edge {s_opt - s_eq:+.3f}")
 
-    ci = S.sharpe_ci(eq)
-    if ci["lo"] <= 0.0 <= ci["hi"]:
+    _, ci_lo, ci_hi = S.sharpe_ci(eq)
+    if ci_lo <= 0.0 <= ci_hi:
         print("\nSTAGE B IS NOT REPORTABLE AS AN IMPROVEMENT.")
-        print(f"  The equal-weight book's Sharpe CI is [{ci['lo']:.3f}, {ci['hi']:.3f}] "
+        print(f"  The equal-weight book's Sharpe CI is [{ci_lo:.3f}, {ci_hi:.3f}] "
               f"and CONTAINS zero.")
         print("  mu is then noise, and a higher optimised Sharpe is covariance fitting,")
         print("  not allocation skill. Reported as such, not as an edge.")

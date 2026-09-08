@@ -116,7 +116,7 @@ def main():
     print("== base case: 10 bps round-trip ==")
     rets, meta = T.run_all(panel, cost_bps=10.0, verbose=True)
     sharpe_net = float(S.sharpe(rets))
-    ci = S.sharpe_ci(rets)
+    _, ci_lo, ci_hi = S.sharpe_ci(rets)
 
     print("\n== selection summary ==")
     sel = pd.read_csv(os.path.join(SEL, "summary.csv"))
@@ -154,8 +154,8 @@ def main():
         "spa_pvalues": spa["pvalues"],
         "spa_criterion": spa["criterion"],
         "spa_mc_stderr": float(S.mc_stderr(spa_p, 20000)),
-        "sharpe_ci_lo": float(ci["lo"]),
-        "sharpe_ci_hi": float(ci["hi"]),
+        "sharpe_ci_lo": float(ci_lo),
+        "sharpe_ci_hi": float(ci_hi),
         "n_trials": N_TRIALS,
         "sr_star_annualised": sr_star,
         "trial_sharpe_n": int(len(trial)),

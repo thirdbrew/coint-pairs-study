@@ -1,0 +1,42 @@
+{
+  "window": 10,
+  "formation_start": "2016-01-01",
+  "formation_end": "2017-01-01",
+  "trading_end": "2017-07-01",
+  "names": 383,
+  "pairs_enumerated": 73153,
+  "tested": 73153,
+  "alpha": 0.05,
+  "sig_raw": 7158,
+  "expected_fp": 3657.65,
+  "excess_over_noise": 3500.35,
+  "q_fdr": 0.1,
+  "sig_fdr": 4,
+  "book_size": 4,
+  "book": [
+    {
+      "a": "HPE",
+      "b": "HPQ",
+      "tstat": -6.1357816912942145,
+      "pvalue": 8.223357276594713e-07
+    },
+    {
+      "a": "C",
+      "b": "TWX",
+      "tstat": -5.961337743289023,
+      "pvalue": 1.9663476849502358e-06
+    },
+    {
+      "a": "SLB",
+      "b": "URI",
+      "tstat": -5.913361911301172,
+      "pvalue": 2.4908326616259753e-06
+    },
+    {
+      "a": "A",
+      "b": "FIS",
+      "tstat": -5.776664725760685,
+      "pvalue": 4.845795223353091e-06
+    }
+  ]
+}

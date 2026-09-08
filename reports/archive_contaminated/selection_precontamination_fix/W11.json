@@ -1,0 +1,138 @@
+{
+  "window": 11,
+  "formation_start": "2016-07-01",
+  "formation_end": "2017-07-01",
+  "trading_end": "2018-01-01",
+  "names": 396,
+  "pairs_enumerated": 78210,
+  "tested": 78210,
+  "alpha": 0.05,
+  "sig_raw": 6422,
+  "expected_fp": 3910.5,
+  "excess_over_noise": 2511.5,
+  "q_fdr": 0.1,
+  "sig_fdr": 712,
+  "book_size": 20,
+  "book": [
+    {
+      "a": "DHR",
+      "b": "NRG",
+      "tstat": -29.32428928177296,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "EIX",
+      "tstat": -23.279004747676257,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "LEN",
+      "tstat": -22.662354600950227,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "PHM",
+      "tstat": -22.583347935855283,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "PGR",
+      "tstat": -22.3802085886973,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "FISV",
+      "tstat": -22.287669250780915,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "PCG",
+      "tstat": -22.284369441143212,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "ES",
+      "tstat": -21.4255722486891,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "HD",
+      "tstat": -21.374574220378545,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "MHK",
+      "tstat": -21.261276482272383,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "HCA",
+      "tstat": -21.192538923225765,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "HAS",
+      "tstat": -21.182463864347692,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "XRX",
+      "tstat": -20.837065196741186,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "PM",
+      "tstat": -20.823315448595693,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "SHW",
+      "tstat": -20.597266216568965,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "HON",
+      "tstat": -20.550570663589404,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "PPL",
+      "tstat": -20.415625914992706,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "DLR",
+      "tstat": -20.147237703907187,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "ULTA",
+      "tstat": -20.00489593821654,
+      "pvalue": 0.0
+    },
+    {
+      "a": "DHR",
+      "b": "ORCL",
+      "tstat": -19.984496053088726,
+      "pvalue": 0.0
+    }
+  ]
+}

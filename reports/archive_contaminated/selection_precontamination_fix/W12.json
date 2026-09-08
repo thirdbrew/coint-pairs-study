@@ -1,0 +1,36 @@
+{
+  "window": 12,
+  "formation_start": "2017-01-01",
+  "formation_end": "2018-01-01",
+  "trading_end": "2018-07-01",
+  "names": 402,
+  "pairs_enumerated": 80601,
+  "tested": 80601,
+  "alpha": 0.05,
+  "sig_raw": 5261,
+  "expected_fp": 4030.05,
+  "excess_over_noise": 1230.9499999999998,
+  "q_fdr": 0.1,
+  "sig_fdr": 3,
+  "book_size": 3,
+  "book": [
+    {
+      "a": "EXR",
+      "b": "PHM",
+      "tstat": -6.090567976306446,
+      "pvalue": 1.032650721145452e-06
+    },
+    {
+      "a": "DHI",
+      "b": "EXR",
+      "tstat": -5.850070227554144,
+      "pvalue": 3.3948911811800656e-06
+    },
+    {
+      "a": "ILMN",
+      "b": "XYL",
+      "tstat": -5.840795790558285,
+      "pvalue": 3.551703616055282e-06
+    }
+  ]
+}
