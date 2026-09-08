@@ -17,6 +17,8 @@ implementation, which is exactly why it is worth more here than reading the code
 Run:  python test_lookahead.py     (or pytest test_lookahead.py)
 """
 
+import os
+
 import numpy as np
 
 import hedge_ratio as H
@@ -94,6 +96,121 @@ def test_smoother_would_fail_this_probe():
     raise AssertionError(
         "the probe did NOT catch a full-sample estimator, so it is not testing "
         "what it claims to test")
+
+
+def _trading_path_leaks(cut=40, max_pairs=24):
+    """Perturb the TRADING window from `cut` onward; the earlier returns must not move.
+
+    THE GAP THIS CLOSES. Everything above probes the estimator FUNCTIONS. The real
+    bug lived one level up, in trade.pair_returns: a causal estimator was wrapped
+    in a normalisation that took the MEAN OF THE TRADING-WINDOW BETA and used it to
+    build the formation spread whose mu/sigma set every z-score. Estimators passed;
+    the path they were used through did not. A probe that stops at the function
+    boundary cannot see that, and this one deliberately does not stop there.
+
+    Returns {estimator: (n_leaking, max_delta)} over real book pairs.
+    """
+    import json
+
+    import formation as F
+    import trade as T
+
+    panel = F.download()
+    ws = F.windows()
+
+    pairs = []
+    for w in ws:
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         "reports", "selection", f"W{w.index:02d}.json")
+        if not os.path.exists(p):
+            continue
+        for e in json.load(open(p, encoding="utf-8"))["book"]:
+            pairs.append((w, e["a"], e["b"]))
+        if len(pairs) >= max_pairs:
+            break
+    pairs = pairs[:max_pairs]
+
+    out = {}
+    for name, fn in H.ESTIMATORS.items():
+        beta_fn = None if name == "static_ols" else fn
+        n_leak, worst = 0, 0.0
+        for w, a, b in pairs:
+            base = T.pair_returns(w, panel, a, b, beta_fn=beta_fn)
+            if base is None or len(base) <= cut:
+                continue
+            bumped = panel.copy()
+            idx = w.trading(panel).index[cut:]
+            bumped.loc[idx, a] = bumped.loc[idx, a] * 1.35
+            alt = T.pair_returns(w, bumped, a, b, beta_fn=beta_fn)
+            if alt is None:
+                continue
+            d = float(np.nanmax(np.abs(base.to_numpy()[:cut] - alt.to_numpy()[:cut])))
+            if d > TOL:
+                n_leak += 1
+            worst = max(worst, d)
+        out[name] = (n_leak, worst)
+    return out
+
+
+def test_trading_path_is_causal():
+    """End-to-end: a perturbation late in the trading window cannot move early returns."""
+    res = _trading_path_leaks()
+    bad = {k: v for k, v in res.items() if v[0] > 0}
+    assert not bad, (
+        f"LOOKAHEAD in the trading path (not in the estimators): {bad}. "
+        f"Perturbing trading day 40 onward moved returns on days 0-39.")
+
+
+def test_trading_path_probe_has_teeth():
+    """Guard the guard, at the PATH level this time.
+
+    The estimator-level probe already had a meta-test and it did not help,
+    because the leak was one level up. Zero leaking pairs only means something
+    if this probe can register a leak at all, so drive a deliberately
+    non-causal estimator through trade.pair_returns and require it be caught.
+    Measured: 23 of 24 book pairs, max delta 1.17e-01.
+    """
+    import json
+
+    import formation as F
+    import trade as T
+
+    def leaky(f_la, f_lb, t_la, t_lb):
+        la = np.concatenate([f_la, t_la])
+        lb = np.concatenate([f_lb, t_lb])
+        ok = np.isfinite(la) & np.isfinite(lb)
+        X = np.column_stack([np.ones(ok.sum()), lb[ok]])
+        coef, *_ = np.linalg.lstsq(X, la[ok], rcond=None)
+        n = len(t_la)
+        return np.full(n, float(coef[1])), np.full(n, float(coef[0]))
+
+    panel = F.download()
+    here = os.path.dirname(os.path.abspath(__file__))
+    pairs = []
+    for w in F.windows():
+        p = os.path.join(here, "reports", "selection", f"W{w.index:02d}.json")
+        if os.path.exists(p):
+            for e in json.load(open(p, encoding="utf-8"))["book"]:
+                pairs.append((w, e["a"], e["b"]))
+        if len(pairs) >= 12:
+            break
+
+    caught = 0
+    for w, a, b in pairs[:12]:
+        base = T.pair_returns(w, panel, a, b, beta_fn=leaky)
+        if base is None or len(base) <= 40:
+            continue
+        bumped = panel.copy()
+        idx = w.trading(panel).index[40:]
+        bumped.loc[idx, a] = bumped.loc[idx, a] * 1.35
+        alt = T.pair_returns(w, bumped, a, b, beta_fn=leaky)
+        if float(np.nanmax(np.abs(base.to_numpy()[:40]
+                                  - alt.to_numpy()[:40]))) > TOL:
+            caught += 1
+
+    assert caught > 0, (
+        "the trading-path probe did NOT register a deliberately non-causal "
+        "estimator, so its zero-leak result means nothing")
 
 
 if __name__ == "__main__":

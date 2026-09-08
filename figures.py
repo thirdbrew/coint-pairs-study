@@ -171,11 +171,11 @@ def fig_estimators(c):
 
     ax.set_yticks(range(len(order)))
     ax.set_yticklabels([label[k] for k in reversed(order)], fontsize=9.5)
-    _style(ax, "The more adaptive the hedge ratio, the worse it does",
+    _style(ax, "The static hedge ratio is the one ruled out",
            "Annualised Sharpe (point estimate and 95% CI)", "")
     ax.tick_params(axis="y", labelcolor=INK)
     ax.grid(axis="y", visible=False)
-    ax.set_xlim(-2.05, 0.85)
+    ax.set_xlim(-1.05, 1.45)
     ax.set_ylim(-0.55, 2.62)
     return _save(fig, "fig4_estimators.png")
 

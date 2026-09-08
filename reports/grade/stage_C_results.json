@@ -1,24 +1,24 @@
 {
-  "static_ols_excluded": 0.0,
+  "static_ols_excluded": 1.0,
   "mcs_included": [
-    "rolling_ols",
-    "static_ols"
+    "kalman",
+    "rolling_ols"
   ],
   "mcs_excluded": [
-    "kalman"
+    "static_ols"
   ],
   "mcs_pvalues": {
-    "kalman": 0.0087,
-    "rolling_ols": 0.34555,
-    "static_ols": 1.0
+    "static_ols": 0.0199,
+    "kalman": 0.0732,
+    "rolling_ols": 1.0
   },
   "mcs_criterion": "sharpe",
   "mcs_reps": 20000,
   "mcs_size": 0.05,
   "sharpes": {
     "static_ols": -0.24958855341903374,
-    "rolling_ols": -0.5135648758352186,
-    "kalman": -1.1279067398113045
+    "rolling_ols": 0.4619608414090503,
+    "kalman": -0.04635065763020288
   },
   "sharpe_cis": {
     "static_ols": [
@@ -26,18 +26,18 @@
       0.2957900144926514
     ],
     "rolling_ols": [
-      -0.9884381334817702,
-      -0.0013224208087401212
+      -0.009580329694975687,
+      0.9021963909570256
     ],
     "kalman": [
-      -1.6213104545968666,
-      -0.6342485830420639
+      -0.40879853267904276,
+      0.3429806498018885
     ]
   },
   "total_returns": {
     "static_ols": -0.2663721543101005,
-    "rolling_ols": -0.46962883895919216,
-    "kalman": -0.7139956475898868
+    "rolling_ols": 0.32819051943322797,
+    "kalman": -0.0183848134669691
   },
   "days": 3642
 }

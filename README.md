@@ -13,15 +13,15 @@ step treated as the multiple-testing problem it actually is.
 |---|---|
 | Pairs a naive cointegration screen calls "significant" | **173,594** |
 | Pairs chance alone predicts at α=0.05 | **122,920** |
-| Expected max Sharpe from a 2.46M-pair search, **from luck alone** | **7.29** |
+| Expected max Sharpe from a 2.46M-pair search, **from luck alone** | **1.33** |
 
 ![Observed vs expected cointegrated pairs per window](reports/figures/fig1_noise_ratio.png)
 
 After Benjamini–Hochberg FDR control, **1,446 pairs survive** — 0.83% of the naive count —
-and **9 of 29 windows hold nothing tradable**. Traded out-of-sample the surviving book
-returns Sharpe **−0.25**, against a pre-registered bar of ≥0.50.
+and **9 of 29 windows hold nothing tradable**. Traded out-of-sample with a static hedge
+ratio the surviving book returns Sharpe **−0.25**, against a pre-registered bar of ≥0.50.
 
-**At 0 bps — free trading — the Sharpe is still −0.19.** The cost curve never crosses
+**At zero cost — free trading — the Sharpe is still −0.19.** The cost curve never crosses
 zero. This edge is not destroyed by transaction costs; it is not there gross.
 
 ## Pre-registration
@@ -33,12 +33,12 @@ only on one disk can be rewritten after the result is known, which is not a bar.
 | stage | question | frozen | verdict |
 |---|---|---|---|
 | **A** selection | does cointegration selection retain edge after correction? | `73543a53` | **FAIL 0/3** |
-| **C** estimation | is a time-varying hedge ratio distinguishable from static OLS? | `ec59631b` | **FAIL 0/1** |
+| **C** estimation | is a time-varying hedge ratio distinguishable from static OLS? | `ec59631b` | **PASS 1/1** |
 | **B** allocation | does convex allocation beat equal weighting? | `aa565e04` | **PASS 1/1**, and void |
 
-Stage B's pass is void *by its own registration*, written before the number existed:
-the equal-weight benchmark's Sharpe CI contains zero, so the optimiser improved on an
-estimate of noise. That is covariance fitting, not skill.
+Stage B's pass is void *by its own registration*, written before the number existed: the
+equal-weight benchmark's Sharpe CI contains zero, so the optimiser improved on an estimate
+of noise. That is covariance fitting, not skill.
 
 ## What the three stages do
 
@@ -59,23 +59,30 @@ B  ALLOCATION     max mu'w - (lambda/2) w'Sigma w
 Two multiplicities, two corrections, applied at the stage each belongs to: **FDR** on
 selection, **Model Confidence Set** on model choice, **deflated Sharpe** on performance.
 
-## Three bugs, none found by code review
+## Four bugs, none found by code review
 
-1. **25 tickers returned a different company's prices.** Symbols retired from the index
-   and later reassigned — `FB`, `EMC`, `S` (Sprint → SentinelOne), `BEAM`, `SE` and 20
-   more — come back from yfinance as the *new* company under the *old* symbol, with no
-   error and no gap. Found by chasing a window that returned +72.7% on two pairs.
-   *The first fix was worse than the bug:* an absolute price floor deleted **NVDA**, whose
-   legitimate back-adjusted 2011 close is $0.36.
-2. **The Kalman filter leaked the future.** Variance parameters were fit by MLE over
-   formation + trading, so the states were causal *given* parameters that had seen the
-   future. Perturbing only the last trading day moved β on earlier days by 3.8e-02.
-3. **Two API assumptions that would have thrown** — `spa_test`'s return shape, and a
-   Sharpe criterion applied to a zero-variance benchmark.
+An independent adversarial review of the finished study **reversed one of its published
+conclusions**. That is recorded here rather than quietly patched, because it is the most
+instructive part of the project.
 
-Both classes are now pinned by tests, in **both directions**: `test_lookahead.py` includes
-a meta-test asserting the probe catches a deliberately non-causal estimator, because a
-probe that passes everything is not a probe.
+1. **The trading path leaked the future** — and it flipped Stage C's registered verdict
+   from FAIL to PASS. The z-score was normalised with the *mean of the trading-window
+   beta*, so day 0's signal depended on day 125's prices. It hid because for static OLS
+   that mean is a constant and nothing leaks: **Stage A was causally clean by luck of
+   estimator choice, not by design.** And the causality probe tested the estimator
+   *functions*, never the path built on them. Both are now fixed and probed end-to-end,
+   with a meta-test at the path level.
+2. **SR\* was a restatement of the trial horizon.** Trial Sharpes were measured on single
+   pairs over ~125 days and applied to a 3,642-day book. Reported 7.29; correct 1.33.
+3. **25 tickers returned a different company's prices** — `FB`, `EMC`, `S` (Sprint →
+   SentinelOne), `BEAM`, `SE` and 20 more, retired symbols later reassigned. Found by
+   chasing a window that returned +72.7% on two pairs. *The first fix was worse than the
+   bug:* an absolute price floor deleted **NVDA**, whose back-adjusted 2011 close is $0.36.
+4. **The Kalman filter's variance parameters saw the future**, caught by the
+   estimator-level probe.
+
+Both probe classes now pin **both directions** — a probe that passes everything is not a
+probe.
 
 ## Layout
 
@@ -83,11 +90,13 @@ probe that passes everything is not a probe.
 formation.py         price panel, 29-window GGR schedule, ticker-reuse filter
 selection.py         stage A: Engle-Granger + Benjamini-Hochberg
 trade.py             book -> daily returns; costs, delisting, committed capital
-hedge_ratio.py       stage C: three estimators, all causal
-allocate.py          stage B: the convex program
-grade_A.py           registered metrics, trial-Sharpe distribution, cost curve
+hedge_ratio.py       stage C: three estimators
+allocate.py          stage B: the convex program, net of turnover
+grade_A.py           registered metrics, trial distribution, cost curve
 grade_C.py           Model Confidence Set
-test_lookahead.py    causality probe (+ meta-test)
+mechanism_C.py       the absorption table
+figures.py           the four charts
+test_lookahead.py    causality probes, estimator AND path level (+ meta-tests)
 test_data_quality.py ticker-reuse filter, pinned both ways
 universe.py  stats_lib.py  prereg.py     vendored, unmodified
 ```
@@ -96,22 +105,26 @@ universe.py  stats_lib.py  prereg.py     vendored, unmodified
 
 ```bash
 pip install numpy pandas scipy statsmodels arch yfinance joblib cvxpy
-python formation.py    # panel + coverage + data-quality audit
-python selection.py    # ~20 min on 16 cores
-python grade_A.py ; python grade_C.py ; python allocate.py
+python formation.py
+python selection.py      # ~40 min on 16 cores
+python grade_A.py ; python grade_C.py ; python mechanism_C.py ; python allocate.py
 python test_lookahead.py ; python test_data_quality.py
 ```
 
 ## Honest limits
 
 Point-in-time membership fixes **selection, not prices**. 190 of 829 union members
-(22.9%) cannot be priced by yfinance at all; coverage is **77.1%**, and the loss is
-**time-varying** — early windows lose more, so the study is better-powered after ~2018.
-A clean fix needs CRSP or Norgate.
+(22.9%) cannot be priced; coverage is **77.1%**, and the loss is **time-varying** — early
+windows lose more, so the study is better-powered after ~2018. A clean fix needs CRSP or
+Norgate.
 
 The result is a **non-detection, not a disproof**: the Sharpe CI is [−0.72, +0.30] and
 contains zero. It is a statement about GGR-style cointegration selection on US large caps
 2011–2026 — not about pairs trading in general.
+
+Stage C's winner, rolling OLS, has its own CI touching zero, and sits on a book whose
+selection stage failed its bar. The Model Confidence Set rules static OLS *out*; it does
+not establish that anything is *in*.
 
 The strategy is long/short and therefore untradable in a cash account. This is research.
 No position in it was ever taken.

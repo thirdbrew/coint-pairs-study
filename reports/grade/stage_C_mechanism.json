@@ -1,17 +1,20 @@
 {
   "static_ols": {
-    "mean_abs_z": 2.546666577369402,
+    "mean_abs_z": 2.546666577369404,
     "frac_beyond_entry": 0.5029761282239694,
-    "mean_beta_sd": 1.312081756375185e-16
+    "mean_beta_sd": 1.312081756375185e-16,
+    "pairs": 187
   },
   "rolling_ols": {
-    "mean_abs_z": 1.5451970573096154,
-    "frac_beyond_entry": 0.2854011323619428,
-    "mean_beta_sd": 0.4504608307713421
+    "mean_abs_z": 1.0067124230106512,
+    "frac_beyond_entry": 0.09464530497868787,
+    "mean_beta_sd": 0.4504608307713421,
+    "pairs": 187
   },
   "kalman": {
-    "mean_abs_z": 1.6994610639477892,
-    "frac_beyond_entry": 0.31288008849678683,
-    "mean_beta_sd": 0.02348206285747941
+    "mean_abs_z": 0.9672810895209082,
+    "frac_beyond_entry": 0.03587522632531896,
+    "mean_beta_sd": 0.02348206285747941,
+    "pairs": 187
   }
 }

@@ -48,7 +48,17 @@ OUT = os.path.join(HERE, "reports", "trade")
 
 ENTRY_Z = 2.0       # GGR convention -- NOT tuned, see the spec's hard constraints
 EXIT_Z = 0.5
-COST_BPS = 10.0     # round-trip base case; the cost curve sweeps this
+COST_BPS = 10.0     # ONE-WAY bps per leg -- see the note below
+
+# THE UNIT ON THIS NUMBER IS ONE-WAY PER LEG, NOT ROUND-TRIP.
+# Cost is charged on |dw| for each leg separately, so entering and exiting a
+# dollar-neutral pair pays 4 x cost_bps of leg turnover = 2 x cost_bps of gross
+# exposure. Measured on a controlled single entry+exit at cost_bps=10: 20.00 bps
+# of gross. The registration and the first write-up both called the base case
+# "10 bps round-trip"; it is 20 bps round-trip. The deviation is CONSERVATIVE --
+# it can only make a null more negative, never manufacture one -- so the graded
+# result stands and the label is what gets corrected. At the registered 10 bps
+# round-trip (cost_bps=5) the Sharpe is -0.2173, already on the cost curve.
 
 
 def ols_beta(la, lb):
@@ -85,7 +95,30 @@ def pair_returns(window, panel, a, b, cost_bps=COST_BPS,
         alpha_t = np.full(len(t_la), alpha)
     else:
         beta_t, alpha_t = beta_fn(f_la, f_lb, t_la, t_lb)
-        beta, alpha = float(np.nanmean(beta_t)), float(np.nanmean(alpha_t))
+        # THE NORMALISATION BETA MUST NOT COME FROM THE TRADING WINDOW.
+        #
+        # This line previously read:
+        #     beta, alpha = float(np.nanmean(beta_t)), float(np.nanmean(alpha_t))
+        # and beta_t spans the TRADING window. Its mean then built the FORMATION
+        # spread below, whose mu/sigma normalise z on every trading day --
+        # including day 0. So the day-0 signal depended on day-125 prices.
+        #
+        # It hid for two reasons. For static OLS beta_t is constant, so the mean
+        # IS that constant and nothing leaks -- which is why stage A was causally
+        # clean by luck of estimator choice rather than by design. And
+        # test_lookahead.py probes the estimator FUNCTIONS, never this path, so a
+        # causal estimator wrapped in a leaking normalisation passed every check.
+        #
+        # Measured before the fix, perturbing trading day >= 40 and reading days
+        # 0..39: static 0/46 pairs moved, rolling 24/46 (max 8.1e-02), kalman
+        # 32/46 (max 1.02e-01). Closing it REVERSED stage C's conclusion.
+        #
+        # The fix asks the estimator for its own beta as of the LAST FORMATION
+        # DAY, computed from formation data only -- no trading bar is visible.
+        n_beta, n_alpha = beta_fn(f_la[:-1], f_lb[:-1], f_la[-1:], f_lb[-1:])
+        beta, alpha = float(n_beta[-1]), float(n_alpha[-1])
+        if not np.isfinite(beta) or not np.isfinite(alpha):
+            return None
 
     f_spread = f_la - (alpha + beta * f_lb)
     mu, sigma = np.nanmean(f_spread), np.nanstd(f_spread, ddof=1)

@@ -76,7 +76,7 @@ def solve(mu, Sigma, w_prev, gross=GROSS, cap=CAP, turnover=TURNOVER,
         return w_prev
 
 
-def allocate_window(pairs_df, **kw):
+def allocate_window(pairs_df, cost_bps=T.COST_BPS, **kw):
     """Walk one trading window, re-solving every REBALANCE days.
 
     CAUSAL BY CONSTRUCTION: at rebalance date t the estimates use pairs_df
@@ -102,7 +102,19 @@ def allocate_window(pairs_df, **kw):
         W[t] = w
 
     weights = pd.DataFrame(W, index=R.index, columns=R.columns)
-    rets = (weights * R).sum(axis=1)
+    gross = (weights * R).sum(axis=1)
+
+    # THE REGISTERED CRITERION SAYS "NET OF TURNOVER" AND THIS WAS MISSING.
+    # The pair-level returns in R already carry each pair's own entry/exit cost,
+    # but the OPTIMISER'S re-weighting is itself turnover and was free: every
+    # rebalance moved capital between pairs at no charge. Measured across 99
+    # rebalance days the allocator generates 37.46 units of L1 turnover, and
+    # charging it at the same convention trade.py uses moves sharpe_edge from
+    # +0.1896 to +0.1009 against a bar of >= 0.10. Reporting the uncharged
+    # figure was reporting a criterion the run never evaluated.
+    turnover = weights.diff().abs().sum(axis=1)
+    turnover.iloc[0] = weights.iloc[0].abs().sum()
+    rets = gross - turnover * (cost_bps / 1e4)
     return rets, weights
 
 
@@ -132,12 +144,14 @@ def run_all(panel, cost_bps=T.COST_BPS, beta_fn=None, verbose=True):
         # equal weight uses the SAME gross budget, so the comparison is not
         # secretly a leverage comparison
         eq = df.fillna(0.0).sum(axis=1) * (GROSS / df.shape[1])
-        opt, _ = allocate_window(df)
+        opt, wts = allocate_window(df, cost_bps=cost_bps)
+        turn = float(wts.diff().abs().sum(axis=1).sum())
 
         opt_chunks.append(opt)
         eq_chunks.append(eq)
         rows.append({"window": w.index, "pairs": df.shape[1],
-                     "opt": float(opt.sum()), "eq": float(eq.sum())})
+                     "opt": float(opt.sum()), "eq": float(eq.sum()),
+                     "l1_turnover": turn})
         if verbose:
             print(f"W{w.index:02d} pairs {df.shape[1]:2d} | opt {opt.sum():+.4f} "
                   f"| eq {eq.sum():+.4f}", flush=True)
@@ -176,6 +190,8 @@ def main():
         "optimised_ci": [float(o_lo), float(o_hi)],
         "benchmark_ci_contains_zero": benchmark_ci_contains_zero,
         "reportable_as_improvement": not benchmark_ci_contains_zero,
+        "turnover_charged": True,
+        "cost_bps_one_way": float(args.cost_bps),
         "gross": GROSS, "cap": CAP, "turnover": TURNOVER,
         "risk_aversion": RISK_AVERSION, "rebalance_days": REBALANCE,
         "lookback_days": LOOKBACK,
