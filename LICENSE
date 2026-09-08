@@ -19,19 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-THIRD-PARTY DATA
-
-data/sp500_ticker_start_end.csv is point-in-time S&P 500 membership from
-https://github.com/fja05680/sp500, used under the MIT License. See
-data/sp500_ticker_start_end.SOURCE.txt for the vendoring record.
-
----
-
-NOT INVESTMENT ADVICE
-
-This repository is a research study. It reports a pre-registered null result and
-documents its own defects. Nothing in it is a recommendation to trade, and the
-strategy it examines is long/short and was never traded by the author.
