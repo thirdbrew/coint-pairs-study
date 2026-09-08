@@ -1,0 +1,7 @@
+source: https://github.com/fja05680/sp500 (file: sp500_ticker_start_end.csv)
+vendored: 2026-08-18
+coverage: 1259 membership spells, 1206 unique tickers, 52 with re-entries; fresh through 2026-06-30
+license: MIT (see upstream repo)
+why vendored: a backtest universe must be reproducible and offline. Pulling this at runtime
+  would make every historical result depend on whatever upstream looked like that day.
+refresh: re-download and bump the vendored date when the index changes materially.
