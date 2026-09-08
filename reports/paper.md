@@ -83,6 +83,8 @@ Thresholds are not tuned because tuning them is a further search that would have
 | Windows with an empty book | **9 of 29** |
 | Windows finding *fewer* than chance predicts | **4** |
 
+![Observed vs expected cointegrated pairs per window](figures/fig1_noise_ratio.png)
+
 The median window runs at 1.35x noise. Four windows come in **below** 1.0 — the screen
 found fewer cointegrated pairs than random data would have produced.
 
@@ -104,12 +106,18 @@ cost (bps round-trip)     annualised Sharpe     total return
        50                     -0.5059             -54.14%
 ```
 
+![Net Sharpe against round-trip cost](figures/fig2_cost_curve.png)
+
 **Breakeven cost: −∞. The curve never crosses zero.**
 
 This is the load-bearing detail. A common and comfortable finding is that a strategy is
 real gross and destroyed by transaction costs. **This one is not there gross.** At zero
 cost — free trading, infinite liquidity — the Sharpe is still −0.1851 over 3,642 trading
 days.
+
+![Cumulative return of the surviving book](figures/fig3_equity_curve.png)
+
+The flat stretches are the nine windows whose books were empty after FDR control — periods where the honest answer was to hold nothing.
 
 ### 3.3 The grade
 
@@ -155,6 +163,8 @@ static_ols    -0.2496   [-0.7229, +0.2958]     1.0000     0.0000     INCLUDED
 rolling_ols   -0.5136   [-0.9884, -0.0013]     0.3456     0.0034     INCLUDED
 kalman        -1.1279   [-1.6213, -0.6342]     0.0087     0.0007     EXCLUDED
 ```
+
+![Sharpe by estimator with 95% confidence intervals](figures/fig4_estimators.png)
 
 **The Model Confidence Set eliminates the Kalman filter** — the most sophisticated
 estimator — at p=0.0087. Performance degrades monotonically with estimator

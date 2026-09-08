@@ -15,6 +15,8 @@ step treated as the multiple-testing problem it actually is.
 | Pairs chance alone predicts at α=0.05 | **122,920** |
 | Expected max Sharpe from a 2.46M-pair search, **from luck alone** | **7.29** |
 
+![Observed vs expected cointegrated pairs per window](reports/figures/fig1_noise_ratio.png)
+
 After Benjamini–Hochberg FDR control, **1,446 pairs survive** — 0.83% of the naive count —
 and **9 of 29 windows hold nothing tradable**. Traded out-of-sample the surviving book
 returns Sharpe **−0.25**, against a pre-registered bar of ≥0.50.
