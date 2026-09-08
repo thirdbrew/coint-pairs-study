@@ -131,8 +131,14 @@ def pair_returns(window, panel, a, b, cost_bps=COST_BPS,
     return pd.Series(net, index=trade.index, name=f"{a}/{b}")
 
 
-def run_window(window, panel, book, cost_bps=COST_BPS, beta_fn=None):
-    """Book -> one daily portfolio return series (return on committed capital)."""
+def pair_panel(window, panel, book, cost_bps=COST_BPS, beta_fn=None):
+    """Book -> DataFrame of per-pair daily returns, one column per tradable pair.
+
+    This is the unit stage B allocates over. run_window collapses it with equal
+    weights; allocate.py solves for the weights instead. Both consume the same
+    object, so the comparison is like-for-like by construction rather than by
+    two code paths that are meant to agree.
+    """
     series = []
     for entry in book:
         s = pair_returns(window, panel, entry["a"], entry["b"],
@@ -140,11 +146,17 @@ def run_window(window, panel, book, cost_bps=COST_BPS, beta_fn=None):
         if s is not None:
             series.append(s)
     if not series:
-        idx = window.trading(panel).index
-        return pd.Series(0.0, index=idx), 0
-    df = pd.concat(series, axis=1)
+        return pd.DataFrame(index=window.trading(panel).index)
+    return pd.concat(series, axis=1)
+
+
+def run_window(window, panel, book, cost_bps=COST_BPS, beta_fn=None):
+    """Book -> one daily portfolio return series (return on committed capital)."""
+    df = pair_panel(window, panel, book, cost_bps=cost_bps, beta_fn=beta_fn)
+    if df.empty or df.shape[1] == 0:
+        return pd.Series(0.0, index=window.trading(panel).index), 0
     # divide by the BOOK size, not the number that survived -- committed capital
-    return df.sum(axis=1) / len(book), len(series)
+    return df.sum(axis=1) / len(book), df.shape[1]
 
 
 def run_all(panel, cost_bps=COST_BPS, beta_fn=None, verbose=True):

@@ -1,0 +1,30 @@
+{
+  "window": 5,
+  "formation_start": "2013-07-01",
+  "formation_end": "2014-07-01",
+  "trading_end": "2015-01-01",
+  "names": 358,
+  "pairs_enumerated": 63903,
+  "tested": 63903,
+  "alpha": 0.05,
+  "sig_raw": 4553,
+  "expected_fp": 3195.15,
+  "excess_over_noise": 1357.85,
+  "q_fdr": 0.1,
+  "sig_fdr": 2,
+  "book_size": 2,
+  "book": [
+    {
+      "a": "COL",
+      "b": "REGN",
+      "tstat": -6.7361498843834156,
+      "pvalue": 3.591422557112184e-08
+    },
+    {
+      "a": "COL",
+      "b": "LOW",
+      "tstat": -6.288805735028797,
+      "pvalue": 3.7710074099536027e-07
+    }
+  ]
+}

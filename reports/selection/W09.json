@@ -1,0 +1,36 @@
+{
+  "window": 9,
+  "formation_start": "2015-07-01",
+  "formation_end": "2016-07-01",
+  "trading_end": "2017-01-01",
+  "names": 375,
+  "pairs_enumerated": 70125,
+  "tested": 70123,
+  "alpha": 0.05,
+  "sig_raw": 3519,
+  "expected_fp": 3506.15,
+  "excess_over_noise": 12.849999999999909,
+  "q_fdr": 0.1,
+  "sig_fdr": 3,
+  "book_size": 3,
+  "book": [
+    {
+      "a": "CMS",
+      "b": "XEL",
+      "tstat": -6.399134150740337,
+      "pvalue": 2.1320061942454374e-07
+    },
+    {
+      "a": "CI",
+      "b": "KSS",
+      "tstat": -5.97398362849601,
+      "pvalue": 1.8470911407360017e-06
+    },
+    {
+      "a": "MO",
+      "b": "NI",
+      "tstat": -5.967208955785401,
+      "pvalue": 1.9100748506925233e-06
+    }
+  ]
+}
