@@ -1,0 +1,48 @@
+{
+  "window": 13,
+  "formation_start": "2017-07-01",
+  "formation_end": "2018-07-01",
+  "trading_end": "2019-01-01",
+  "names": 409,
+  "pairs_enumerated": 83436,
+  "tested": 83436,
+  "alpha": 0.05,
+  "sig_raw": 4889,
+  "expected_fp": 4171.8,
+  "excess_over_noise": 717.1999999999998,
+  "q_fdr": 0.1,
+  "sig_fdr": 5,
+  "book_size": 5,
+  "book": [
+    {
+      "a": "NRG",
+      "b": "PG",
+      "tstat": -6.815213940891824,
+      "pvalue": 2.346204123134213e-08
+    },
+    {
+      "a": "ORLY",
+      "b": "TROW",
+      "tstat": -6.233933820390163,
+      "pvalue": 4.995083847072095e-07
+    },
+    {
+      "a": "FISV",
+      "b": "SPGI",
+      "tstat": -5.881539763626297,
+      "pvalue": 2.911394263257167e-06
+    },
+    {
+      "a": "NRG",
+      "b": "TDG",
+      "tstat": -5.8077327125815925,
+      "pvalue": 4.170116068040348e-06
+    },
+    {
+      "a": "IBM",
+      "b": "ITW",
+      "tstat": -5.761330813218058,
+      "pvalue": 5.217347415787132e-06
+    }
+  ]
+}

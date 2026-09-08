@@ -1,0 +1,24 @@
+{
+  "window": 24,
+  "formation_start": "2023-01-01",
+  "formation_end": "2024-01-01",
+  "trading_end": "2024-07-01",
+  "names": 471,
+  "pairs_enumerated": 110685,
+  "tested": 110685,
+  "alpha": 0.05,
+  "sig_raw": 5566,
+  "expected_fp": 5534.25,
+  "excess_over_noise": 31.75,
+  "q_fdr": 0.1,
+  "sig_fdr": 1,
+  "book_size": 1,
+  "book": [
+    {
+      "a": "ATO",
+      "b": "HPQ",
+      "tstat": -6.566656878775069,
+      "pvalue": 8.858528715332125e-08
+    }
+  ]
+}

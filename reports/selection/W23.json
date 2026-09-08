@@ -1,0 +1,17 @@
+{
+  "window": 23,
+  "formation_start": "2022-07-01",
+  "formation_end": "2023-07-01",
+  "trading_end": "2024-01-01",
+  "names": 464,
+  "pairs_enumerated": 107416,
+  "tested": 107416,
+  "alpha": 0.05,
+  "sig_raw": 4223,
+  "expected_fp": 5370.8,
+  "excess_over_noise": -1147.8000000000002,
+  "q_fdr": 0.1,
+  "sig_fdr": 0,
+  "book_size": 0,
+  "book": []
+}

@@ -1,0 +1,42 @@
+{
+  "window": 27,
+  "formation_start": "2024-07-01",
+  "formation_end": "2025-07-01",
+  "trading_end": "2026-01-01",
+  "names": 484,
+  "pairs_enumerated": 116886,
+  "tested": 116886,
+  "alpha": 0.05,
+  "sig_raw": 9344,
+  "expected_fp": 5844.3,
+  "excess_over_noise": 3499.7,
+  "q_fdr": 0.1,
+  "sig_fdr": 4,
+  "book_size": 4,
+  "book": [
+    {
+      "a": "EW",
+      "b": "KHC",
+      "tstat": -6.320735214908672,
+      "pvalue": 3.199479783484312e-07
+    },
+    {
+      "a": "EW",
+      "b": "GIS",
+      "tstat": -6.072217434773551,
+      "pvalue": 1.1322510708056494e-06
+    },
+    {
+      "a": "EW",
+      "b": "PEP",
+      "tstat": -6.003699042362531,
+      "pvalue": 1.5939247224009615e-06
+    },
+    {
+      "a": "EW",
+      "b": "UNH",
+      "tstat": -5.950604008346872,
+      "pvalue": 2.073429539083084e-06
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "window": 20,
+  "formation_start": "2021-01-01",
+  "formation_end": "2022-01-01",
+  "trading_end": "2022-07-01",
+  "names": 446,
+  "pairs_enumerated": 99235,
+  "tested": 99235,
+  "alpha": 0.05,
+  "sig_raw": 8616,
+  "expected_fp": 4961.75,
+  "excess_over_noise": 3654.25,
+  "q_fdr": 0.1,
+  "sig_fdr": 5,
+  "book_size": 5,
+  "book": [
+    {
+      "a": "IFF",
+      "b": "KO",
+      "tstat": -6.3400636358467635,
+      "pvalue": 2.895688744008264e-07
+    },
+    {
+      "a": "FE",
+      "b": "KO",
+      "tstat": -6.2176127591957036,
+      "pvalue": 5.428906017813054e-07
+    },
+    {
+      "a": "IVZ",
+      "b": "KHC",
+      "tstat": -6.117779182893155,
+      "pvalue": 9.005191262821399e-07
+    },
+    {
+      "a": "PHM",
+      "b": "SJM",
+      "tstat": -5.845392734860893,
+      "pvalue": 3.4731178280603114e-06
+    },
+    {
+      "a": "KIM",
+      "b": "REG",
+      "tstat": -5.826322336737514,
+      "pvalue": 3.8105859444558514e-06
+    }
+  ]
+}

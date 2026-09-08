@@ -1,0 +1,17 @@
+{
+  "window": 8,
+  "formation_start": "2015-01-01",
+  "formation_end": "2016-01-01",
+  "trading_end": "2016-07-01",
+  "names": 365,
+  "pairs_enumerated": 66430,
+  "tested": 66430,
+  "alpha": 0.05,
+  "sig_raw": 6035,
+  "expected_fp": 3321.5,
+  "excess_over_noise": 2713.5,
+  "q_fdr": 0.1,
+  "sig_fdr": 0,
+  "book_size": 0,
+  "book": []
+}
