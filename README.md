@@ -143,9 +143,19 @@ The result is a **non-detection, not a disproof**: the Sharpe CI is [−0.72, +0
 contains zero. It is a statement about GGR-style cointegration selection on US large caps
 2011–2026 — not about pairs trading in general.
 
-Stage C's winner, rolling OLS, has its own CI touching zero, and sits on a book whose
+Stage C's winner, rolling OLS, has its own CI touching zero and sits on a book whose
 selection stage failed its bar. The Model Confidence Set rules static OLS *out*; it does
 not establish that anything is *in*.
+
+Its +0.46 is also **concentrated, not persistent**: across its two long regimes (6.8 and
+5.9 years) it runs at Sharpe **0.26** and **0.18**, while **12% of the sample supplies 69%
+of the growth** in four bursts around 2018–2020. Break dates were detected rather than
+chosen. No Chow test is significant — but the detector finds a *halving* only 43% of the
+time, so that null is weak, and the concentration stands on the attribution table rather
+than on a test.
+
+The graded null, by contrast, is uniform: 92.9% of days sit in one 13.4-year regime at
+Sharpe −0.31.
 
 The strategy is long/short and therefore untradable in a cash account. This is research.
 No position in it was ever taken.

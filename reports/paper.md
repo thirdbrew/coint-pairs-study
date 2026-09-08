@@ -211,6 +211,64 @@ trades almost continuously and loses. Rolling OLS trades selectively. **The Kalm
 absorbs so much that it barely trades at all** — 3.6% of days — and lands near zero,
 which is what a strategy that rarely takes a position should do.
 
+### 4.2 Regime dependence — and why the pass is narrower than it looks
+
+`prereg.grade()` prints a reminder on every pass: *"a pass is a licence to look harder,
+not to deploy. Check regime dependence before acting."* The +0.4620 is the only positive
+Sharpe in this study, so it gets the same scrutiny the null did.
+
+Break dates are **detected, not chosen**. Picking a split after seeing the data makes
+"the edge died in year X" unfalsifiable, because some date always exists that makes a
+strategy look regime-dependent.
+
+| | long regimes (≥1000d) | short regimes (<1000d) |
+|---|---|---|
+| **rolling_ols** — regimes | 2, Sharpe **0.26** and **0.18** | 4, Sharpe 4.76 / −1.48 / 4.26 / 1.17 |
+| days | 3,208 (**88.0%**) | 439 (**12.0%**) |
+| share of growth | **+28.3%** | **+69.1%** |
+
+**Twelve per cent of the sample supplies sixty-nine per cent of the growth**, in four
+short bursts between 2018-11 and 2020-07. Across its two long, quiet stretches — 6.8
+years and 5.9 years — the estimator runs at Sharpe **0.26** and **0.18**, not 0.46.
+
+So the full-sample number is a poor forecast of what this estimator delivers in an
+ordinary year. The Model Confidence Set result stands: static OLS is excluded, and that
+was the registered claim. What does *not* follow is that rolling OLS has a durable edge.
+
+**Two honest qualifications on this table, in both directions.**
+
+*Against over-reading it:* **none of the five Chow tests is significant** (p = 0.37,
+0.99, 0.31, 0.69, 0.30). Formally, stability cannot be rejected. The attribution is
+descriptive, not a test, and concentration of returns is not the same as a proven
+structural change.
+
+*Against under-reading it:* the detector's measured power says a null here is weak
+anyway. From `breaks.py`, over 25–30 synthetic runs:
+
+| pre-Sharpe → post-Sharpe | detected |
+|---|---|
+| 2.54 → 0.00 | 100% |
+| 1.59 → 0.48 | **43%** |
+| 0.95 → 0.79 | 13% |
+| 0.79 → 0.79 (no break) | 10% ← false-positive rate |
+
+A **collapse** is found every time; a **halving** less than half the time; and even a
+detected break can sit two years from where it happened. "No significant break" therefore
+means "no large break detected", not "stable". The concentration stands on the
+attribution table, which needs no test to be read.
+
+### 4.3 The graded null, by contrast, is uniform
+
+Running the same procedure on the stage A series is the control, and it comes back flat:
+**92.9% of days sit in a single 13.4-year regime at Sharpe −0.31, carrying 96.1% of the
+outcome.** The three detected breaks are all in 2012, in segments of 61–136 days at the
+detector's minimum window, and one of three Chow tests reaches p<0.05 — about what three
+tests and a 10% false-positive rate produce on their own.
+
+The null is not an average of a good regime and a bad one. It is the same result
+throughout, which is the stronger form of a null and the reason the fixed midpoint split
+(−0.148 then −0.343) adds nothing to it.
+
 ## 5. Stage B — allocation
 
 **Bar frozen before the run** (`aa565e04`): `sharpe_edge ≥ 0.10`.
@@ -451,6 +509,7 @@ python grade_C.py         # three estimators, Model Confidence Set
 python mechanism_C.py     # the absorption table
 python power_analysis.py  # detectable effect, upper bound, MinBTL
 python sensitivity_filter.py  # dependence on the non-causal rule
+python regime.py          # detected breaks, Chow tests, per-regime attribution
 python allocate.py        # convex allocation vs equal weight
 python test_lookahead.py ; python test_data_quality.py
 ```
