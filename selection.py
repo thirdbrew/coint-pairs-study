@@ -122,7 +122,16 @@ def main():
     ap = argparse.ArgumentParser(description="stage A -- cointegration selection")
     ap.add_argument("--windows", default="all", help="'all' or comma-separated indices")
     ap.add_argument("--jobs", type=int, default=-1)
+    ap.add_argument("--no-price-filter", action="store_true",
+                    help="membership overlap only -- sensitivity check on the "
+                         "one rule that cannot be made causal")
+    ap.add_argument("--out", default=None, help="override output dir")
     args = ap.parse_args()
+
+    if args.no_price_filter:
+        F.PRICE_FILTER = False
+        print("PRICE_FILTER DISABLED -- membership overlap only")
+    out_dir = args.out or OUT
 
     panel = F.download()
     ws = F.windows()
@@ -130,11 +139,11 @@ def main():
         want = {int(x) for x in args.windows.split(",")}
         ws = [w for w in ws if w.index in want]
 
-    os.makedirs(OUT, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)
     rows = []
     for w in ws:
         r = select(w, panel, n_jobs=args.jobs)
-        with open(os.path.join(OUT, f"W{w.index:02d}.json"), "w", encoding="utf-8") as fh:
+        with open(os.path.join(out_dir, f"W{w.index:02d}.json"), "w", encoding="utf-8") as fh:
             json.dump(r, fh, indent=2)
         print(f"   tested {r['tested']:,} | sig@0.05 {r['sig_raw']:,} "
               f"| noise expects {r['expected_fp']:,.0f} "
@@ -144,7 +153,7 @@ def main():
 
     if rows:
         df = pd.DataFrame([{k: v for k, v in r.items() if k != "book"} for r in rows])
-        df.to_csv(os.path.join(OUT, "summary.csv"), index=False, encoding="utf-8")
+        df.to_csv(os.path.join(out_dir, "summary.csv"), index=False, encoding="utf-8")
         print(f"\n{len(rows)} windows | tests {df.tested.sum():,} | "
               f"sig@0.05 {df.sig_raw.sum():,} vs noise {df.expected_fp.sum():,.0f} | "
               f"FDR survivors {df.sig_fdr.sum():,}")

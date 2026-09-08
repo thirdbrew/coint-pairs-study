@@ -203,6 +203,8 @@ def panel_rejects(panel):
             out[t] = f"prices {span} never overlap membership {mem}"
             continue
 
+        if not PRICE_FILTER:
+            continue
         last = _last_px(s)
         if not np.isfinite(last) or last < MIN_LAST_PX:
             out[t] = f"terminal price {last:,.2f} below {MIN_LAST_PX:,.2f}"
@@ -212,8 +214,15 @@ def panel_rejects(panel):
 @functools.lru_cache(maxsize=None)
 def _membership_spells(ticker):
     """(start, end) Timestamps this ticker was an index member. Open spells end today."""
+    # NORMALISE THE SYMBOL THE WAY universe._yf DOES ("BRK.B" -> "BRK-B").
+    # Reading the raw csv without this meant BF-B and BRK-B matched no spell, and
+    # `if spells and ...` below then SKIPPED the membership check for them
+    # entirely. A filter whose failure mode is "unmatched ticker = no check" is
+    # the wrong way round: an unrecognised symbol is exactly the case that should
+    # be looked at harder, not waved through.
     df = pd.read_csv(u.PIT_CSV)
-    rows = df[df["ticker"] == ticker]
+    df["ticker"] = df["ticker"].map(u._yf)
+    rows = df[df["ticker"] == u._yf(ticker)]
     spells = []
     for _, r in rows.iterrows():
         a = pd.Timestamp(r["start_date"])
@@ -250,6 +259,13 @@ def panel_bad(panel):
     return _PANEL_BAD[key]
 
 
+# Set False to disable the PRICE-based rejects (terminal price, formation median)
+# and keep only membership overlap. Exists so the study can MEASURE its own
+# dependence on a rule it cannot make causal -- see the sensitivity note in
+# panel_rejects. Not a tuning knob: both settings are reported.
+PRICE_FILTER = True
+
+
 def members(window, panel, min_obs=200, rejects=None):
     """Tickers eligible for `window`: index members at formation start, priced,
     and carrying a price series that is plausible for a US listing.
@@ -268,7 +284,9 @@ def members(window, panel, min_obs=200, rejects=None):
     for t in asof:
         if t not in form.columns or form[t].notna().sum() < min_obs:
             continue
-        why = bad.get(t) or implausible(form[t])
+        why = bad.get(t) if PRICE_FILTER else None
+        if why is None and PRICE_FILTER:
+            why = implausible(form[t])
         if why is not None:
             if rejects is not None:
                 rejects[t] = why
