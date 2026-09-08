@@ -1,0 +1,24 @@
+{
+  "sharpe_edge": 0.18964727342927798,
+  "sharpe_optimised": -0.059941279989753814,
+  "sharpe_equal_weight": -0.2495885534190318,
+  "equal_weight_ci": [
+    -0.722854711827618,
+    0.2957900144926531
+  ],
+  "optimised_ci": [
+    -0.5489154385743495,
+    0.37990989183396917
+  ],
+  "benchmark_ci_contains_zero": true,
+  "reportable_as_improvement": false,
+  "gross": 1.0,
+  "cap": 0.25,
+  "turnover": 0.5,
+  "risk_aversion": 5.0,
+  "rebalance_days": 21,
+  "lookback_days": 60,
+  "days": 3642,
+  "total_return_optimised": -0.05051471738985985,
+  "total_return_equal_weight": -0.2663721543100971
+}

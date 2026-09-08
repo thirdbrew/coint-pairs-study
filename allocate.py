@@ -166,6 +166,26 @@ def main():
           f"| edge {s_opt - s_eq:+.3f}")
 
     _, ci_lo, ci_hi = S.sharpe_ci(eq)
+    _, o_lo, o_hi = S.sharpe_ci(opt)
+    benchmark_ci_contains_zero = bool(ci_lo <= 0.0 <= ci_hi)
+    results = {
+        "sharpe_edge": float(s_opt - s_eq),
+        "sharpe_optimised": float(s_opt),
+        "sharpe_equal_weight": float(s_eq),
+        "equal_weight_ci": [float(ci_lo), float(ci_hi)],
+        "optimised_ci": [float(o_lo), float(o_hi)],
+        "benchmark_ci_contains_zero": benchmark_ci_contains_zero,
+        "reportable_as_improvement": not benchmark_ci_contains_zero,
+        "gross": GROSS, "cap": CAP, "turnover": TURNOVER,
+        "risk_aversion": RISK_AVERSION, "rebalance_days": REBALANCE,
+        "lookback_days": LOOKBACK,
+        "days": int(len(opt)),
+        "total_return_optimised": float(opt.sum()),
+        "total_return_equal_weight": float(eq.sum()),
+    }
+    with open(os.path.join(OUT, "stage_B_results.json"), "w", encoding="utf-8") as fh:
+        json.dump(results, fh, indent=2)
+
     if ci_lo <= 0.0 <= ci_hi:
         print("\nSTAGE B IS NOT REPORTABLE AS AN IMPROVEMENT.")
         print(f"  The equal-weight book's Sharpe CI is [{ci_lo:.3f}, {ci_hi:.3f}] "
